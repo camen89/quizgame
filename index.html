@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Game</title>
+    <link rel="stylesheet" href="https://camen89.github.io/quizgame/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<link rel="apple-touch-icon" href="apple-touch-icon-180x180.png" sizes="180x180">
+<link rel="icon" type="image/png" href="android-chrome-192x192.png" sizes="192x192">
+</head>
+<body>
+    <h1>Quiz Game</h1>
+    <div class="game-container" id="quiz-container">
+        <div class="question">
+            <p id="question-text"></p>
+            <button class="choice">1</button>
+            <button class="choice">2</button>
+            <button class="choice">3</button>
+            <button id="quiz-setup-button">クイズ作成</button>
+        </div>
+        <p id="result"></p>
+        <p id="score">正解数: 0</p>
+    </div>
+    <div id="quiz-setup-container">
+        <!--<h2>クイズ作成</h2>!-->
+        <label for="custom-question" class="input-label">クイズを入力してください:</label>
+        <input type="text" id="custom-question" class="input-field">
+        <label for="custom-choices" class="input-label">選択肢を入力してください(,で区切ってください):</label>
+        <input type="text" id="custom-choices" class="input-field">
+        <label for="custom-correct-answer" class="input-label">答えを入力してください:</label>
+        <input type="text" id="custom-correct-answer" class="input-field">
+        <div class="button-container">
+            <button id="add-custom-question" class="button">Quizに登録する</button>
+            <button id="return-to-quiz" class="button" id="return-to-quiz-button">Quizに戻る</button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const questions = [];
+            let currentQuestion = 0;
+            let isAnswered = false;
+            let score = 0;
+
+            function loadQuestion() {
+                if (currentQuestion < questions.length) {
+                    const questionObj = questions[currentQuestion];
+                    $("#question-text").text(`${currentQuestion + 1}. ${questionObj.question}`);
+                    $(".choice").each(function(index) {
+                        $(this).text(questionObj.choices[index]);
+                    });
+                    $("#result").text("");
+                    isAnswered = false;
+                } else {
+                    //$("#quiz-container").html(`<p>All questions answered! Your score is: ${score}</p>`);
+                    $("#quiz-container").html(`<p>クイズは終了! 正解数は．．． ${score}問</p>`);
+                }
+            }
+
+            function addCustomQuestion() {
+                const customQuestion = $("#custom-question").val();
+                const customChoices = $("#custom-choices").val().split(',').map(choice => choice.trim());
+                const customCorrectAnswer = $("#custom-correct-answer").val();
+
+                if (customQuestion && customChoices.length === 3 && customCorrectAnswer) {
+                    questions.push({
+                        question: customQuestion,
+                        choices: customChoices,
+                        correctAnswer: customCorrectAnswer
+                    });
+                    $("#custom-question, #custom-choices, #custom-correct-answer").val("");
+                } else {
+                    alert("問題、選択肢、解答を入力してください");
+                }
+            }
+
+            $(".choice").click(function() {
+                if (isAnswered) return;
+
+                const userAnswer = $(this).text();
+                isAnswered = true;
+
+                if (userAnswer === questions[currentQuestion].correctAnswer) {
+                    $("#result").text("正解!");
+                    score++;
+                } else {
+                    $("#result").text(`残念! 正解は: ${questions[currentQuestion].correctAnswer}.`);
+                }
+
+                $("#score").text(`Score: ${score}`);
+                currentQuestion++;
+                setTimeout(loadQuestion, 2000);
+            });
+
+            $("#quiz-setup-button").click(function() {
+                $("#quiz-container").hide();
+                $("#quiz-setup-container").show();
+            });
+
+            $("#add-custom-question").click(addCustomQuestion);
+
+            $("#return-to-quiz").click(function() {
+                $("#quiz-setup-container").hide();
+                if (questions.length > 0) {
+                    loadQuestion();
+                    $("#quiz-container").show();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
